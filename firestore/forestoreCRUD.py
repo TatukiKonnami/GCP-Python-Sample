@@ -2,6 +2,36 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 
+# Insert object
+class City():
+    def __init__(self, name, state, country, capital=False, population=0,
+                 regions=[]):
+        self.name = name
+        self.state = state
+        self.country = country
+        self.capital = capital
+        self.population = population
+        self.regions = regions
+
+    @staticmethod
+    def from_dict(source):
+        pass
+
+    def to_dict(self):
+        return {
+            'name' : self.name,
+            'state' : self.state,
+            'country' : self.country,
+            'capital' : self.capital,
+            'population' : self.population,
+            'regions' : self.regions
+        }
+
+    def __repr__(self):
+        return(
+            u'City(name={}, country={}, population={}, capital={}, regions={})'
+            .format(self.name, self.country, self.population, self.capital,
+                    self.regions))
 
 class Firestore_CRUD():
     self.db = None;
@@ -28,6 +58,14 @@ class Firestore_CRUD():
         docs = users_ref.stream()
         return docs
 
+    # 割とプロジェクトごとに実装は異なる感じっぽい
+    def sample_query(self):
+        doc_ref = self.collection(u'cities')
+        doc_ref.where(u'population', u'<', 100000)
+        doc_ref.where(u'state', u'==', u'CA')
+
+        return doc_ref.stream()
+
 if __name__ == '__main__':
     firebase_crud = Firestore_CRUD('projectId')
     data = {
@@ -44,6 +82,15 @@ if __name__ == '__main__':
     for doc in docs:
         print(u'{} => {}'.format(doc.id, doc.to_dict()))
 
+
+    collection = u'cities'
+    data = City(u'San Francisco', u'CA', u'USA', False, 860000, [u'west_coast', u'norcal']).to_dict()
+    firebase_crud.add(collection, u'SF', data)
+
+    data = City(u'Los Angeles', u'CA', u'USA', False, 3900000, [u'west_coast', u'socal']).to_dict()
+    firebase_crud.add(collection, u'LA', data)    
+
     # query version
-    
-    
+    docs = firebase_crud.sample_query()
+    for doc in docs:
+        print(u'{} => {}'.format(doc.id, doc.to_dict()))
