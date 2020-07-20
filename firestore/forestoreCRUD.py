@@ -53,10 +53,21 @@ class Firestore_CRUD():
         doc_ref = self.db.collection(collection).document(document)
         doc_ref.set(data)
 
+    def update(self, collection, document, data):
+        doc_ref = self.db.collection(collection).document(document)
+        doc_ref.update(data)
+
     def get(self, collection):
         users_ref = self.db.collection(collection)
         docs = users_ref.stream()
         return docs
+
+    def delete_doc(self, collection, document):
+        self.db.collection(collection).document(document).delete()
+
+    def delete_field(self, collection, document, data):
+        doc_ref = self.db.collection(collection).document(document)
+        doc_ref.update(data)
 
     # 割とプロジェクトごとに実装は異なる感じっぽい
     def sample_query(self):
@@ -81,6 +92,21 @@ if __name__ == '__main__':
     docs = firebase_crud.get(collection)
     for doc in docs:
         print(u'{} => {}'.format(doc.id, doc.to_dict()))
+
+    # update
+    data = {
+        u'key' : u'value2'
+    }
+    firebase_crud.update(collection, document,data)
+
+    # del doc
+    firebase_crud.delete_doc(collection, document)
+
+    # del field
+    data = {
+        u'key' : firestore.DELETE_FIELD
+    }
+    firebase_crud.delete_field(collection,document,data)
 
 
     collection = u'cities'
